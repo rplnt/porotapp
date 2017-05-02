@@ -1,0 +1,23 @@
+body {
+    font-size: 1.8em;
+    font-family: "Verdana", sans-serif;
+}
+
+.btn {
+    width: calc(100% - 40px);
+    padding: 10px;
+    margin: 10px;
+    cursor: hand;
+    /*text-align: center;*/
+    border: 1px solid #ccc;
+}
+
+.btn-head {
+    display: block;
+    font-size: 1.6em;
+    font-weight: bold;
+}
+
+.btn-body {
+    font-size: 1.0em;
+}
