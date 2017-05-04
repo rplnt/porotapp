@@ -2,14 +2,20 @@ var MINI = require('minified');
 var _=MINI._, $=MINI.$, $$=MINI.$$, EE=MINI.EE, HTML=MINI.HTML;
 
 var App = {
-    defaultStartTime: new Date('2017-05-20T16:00:00.000+02:00'),
-    defaultCount: 50,  // also equals limit
+    defaultStartTime: new Date('2017-05-04T16:00:00.000+02:00'),
+    defaultCount: 50,
     year: new Date().getFullYear(),
     sessionsKey: 'PBBSessions' + this.year,
 };
 
 $(function() {
-    $('body').fill([EE('div', {id: 'header'}), EE('div', {id: 'app'})]);
+    $('body').fill([
+        EE('div', {id: 'header'}, [
+            EE('span', {$: 'title'}),
+            EE('span', {$: 'timer'})
+        ]),
+        EE('div', {id: 'app'})
+    ]);
 
     App.Init();
     
@@ -19,11 +25,19 @@ $(function() {
 (function(app) {
     var currentSessionKey;
     var currentStopName;
+    var currentSessionStart;
+    var timeRepeater;
 
     app.Init = function() {
         changePage('Session Manager');
         currentSessionKey = null;
-        currentStopName = null;
+        currentStopName = false;
+        currentSessionStart = null;
+
+        if (timeRepeater) {
+            clearInterval(timeRepeater);
+            timeRepeater = false;
+        }
 
         /* Select session */
         var sessions = JSON.parse(localStorage.getItem(app.sessionsKey));
@@ -39,8 +53,7 @@ $(function() {
 
 
     function changePage(title) {
-        // location.hash = '#' + hash;
-        $('#header').fill(title);
+        $('#header .title').fill(title);
         $('#app').fill();
     }
 
@@ -72,7 +85,7 @@ $(function() {
 
         if (!sessionObj[key] || overwrite) {
             sessionObj[key] = value;
-            console.log(sessionObj[key]);
+            // console.log(sessionObj[key]);
             localStorage.setItem(currentSessionKey, JSON.stringify(sessionObj));
         }
     }
@@ -88,36 +101,34 @@ $(function() {
 
         currentSessionKey = key;
 
-        if (!data.teams) {
-            saveSessionData('teams', GetTeams(), false);
+        /* fill in defaults */
+        if (!data.startedCount) saveSessionData('startedCount', app.defaultCount, false);
+        if (!data.startedTime) {
+            saveSessionData('startedTime', app.defaultStartTime, false);
+            currentSessionStart = app.defaultStartTime;
+        } else {
+            currentSessionStart = data.startedTime;
         }
+        if (!data.teams) saveSessionData('teams', [], false);
+        if (!data.teams) saveSessionData('visitedTeams', {}, false);
 
         if (!data.stop) {
             stopSelection();
         } else {
             currentStopName = data.stop;
+            timeRepeater = setInterval(updateTimers, 1000);
             runProgress();
         }
     }
 
 
-    function GetTeams() {
-        console.log('Loading teams...');
-        var teams = [];
-        for (var i = 0; i < startlist.length; i++) {
-            var team = {
-                id: startlist[i].id,
-                name: startlist[i].name,
-                timeIn: null,
-                timeOut: null
-            };
-
-            teams.push(team);
-        }
-
-        console.log('Loaded ' + teams.length + ' teams');
-
-        return teams;
+    function GetTeamObj(team) {
+        return {
+            id: team.id,
+            name: team.name.substring(0, 20),
+            timeIn: null,
+            timeOut: null
+        };
     }
 
 
@@ -127,69 +138,151 @@ $(function() {
         var data = JSON.parse(localStorage.getItem(currentSessionKey));
 
         // add team
-        $('#app').add(getButton('Add Team', data.startedCount - teamCategoryCount(true, false) + ' out of ' + data.startedCount + ' teams remaining', viewUnvisitedTeamList, []));
+        $('#app').add(getButton('Add Team', data.startedCount - teamCategoryCount(true, true) + ' out of ' + data.startedCount + ' teams remaining', addNewTeam, []));
 
         if (data.teams !== undefined && data.teams !== null) {
             $('#app').add(getSubsection('Drinking (' + teamCategoryCount(true, false) + ')'));
-
-            // "active" teams
-            for (var i = 0; i < data.teams.length; i++) {
-                if (data.teams[i].timeIn !== null && data.teams[i].timeOut === null) {
-                    $('#app').add(getButton(data.teams[i].id, data.teams[i].name, teamEnd, [i, data.teams[i].id]));
-                }
-            }
-
+            $('#app').add(getTeamList(LIST_MODE.active));
         }
 
 
         $('#app').add(getSubsection());
+        $('#app').add(getButton('', 'Visited list (' + teamCategoryCount(false, true) + ')', displayTeamListPage, ['Teams Visited', LIST_MODE.past]));
+        $('#app').add(getSubsection());
         $('#app').add(getButton('', 'Session Settings', configCurrentSession, []));
         $('#app').add(getButton('', 'Home', App.Init, []));
+
+        updateTimers();
+    }
+
+
+    function updateTimers() {
+        var now = new Date();
+
+        /* times in team lists */
+        $('#team-list .team').per(function (elmnt, index) {
+            var timeIn = elmnt.get('%timeIn');
+            var timeOut = elmnt.get('%timeOut');
+            if (timeIn && !timeOut) {
+                var diff = parseInt((now - new Date(timeIn)) / 1000, 10);
+                var minutes = Math.floor(diff/60);
+                $('.time', elmnt).set('innerHTML',  (minutes>0?(minutes + 'm '):'') + _.pad(2, diff - (minutes * 60)) + 's');
+            } else if (timeIn && timeOut) {
+                /* passed teams */
+                $('.time', elmnt).set('innerHTML', _.formatValue('HH:mm', new Date(timeOut)));
+            }
+        });
+
+        /* header */
+        if (currentSessionStart !== null) {
+            var diff = parseInt((now - new Date(currentSessionStart)) / 1000, 10);
+            var minutes = Math.floor(diff/60);
+            if (minutes < 0)  {
+                minutes = Math.abs(minutes);
+                $('#header .timer').set('innerHTML', 'Starts in ' + minutes + ' minute' + (minutes==1?'':'s'));
+            } else {
+                $('#header .timer').set('innerHTML', _.pad(2, minutes) + ':' + _.pad(2, diff - (minutes * 60)));
+            }
+        }
     }
 
 
     function teamCategoryCount(entered, left) {
         var data = JSON.parse(localStorage.getItem(currentSessionKey));
 
-        var categoryCount = 0;
+        var enteredCount = 0;
+        var leftCount = 0;
         for (var i = 0; i < data.teams.length; i++) {
-            if (entered === true && data.teams[i].timeIn !== null) {
-                categoryCount++;
+
+            if (data.teams[i].timeOut === null) {
+                enteredCount++;
+            } else if (data.teams[i].timeOut !== null) {
+                leftCount++;
             }
-            if (left === true && data.teams[i].timeOut !== null) {
-                categoryCount++;
-            }
+
         }
 
-        return categoryCount;
+        return (entered?enteredCount:0) + (left?leftCount:0);
     }
 
 
-    function viewUnvisitedTeamList() {
-        changePage('Add team');
+    var LIST_MODE = {active: 0, past: 1};
+
+
+    function addNewTeam() {
+        changePage('New Team');
         var data = JSON.parse(localStorage.getItem(currentSessionKey));
 
-        for (var i = 0; i < data.teams.length; i++) {
-            if (data.teams[i].timeIn !== null) continue;
-            $('#app').add(getButton(data.teams[i].id, data.teams[i].name, teamStart, [i, data.teams[i].id]));
+        if ((new Date() - new Date(currentSessionStart)) < 0) {
+            $('#app').add(EE('span', {$: 'warning'}, 'Teams can\'t drink before start!'));
         }
 
-        $('#app').add(getButton('', 'Back', app.Init, []));
+        for (var i = 0; i < startlist.length; i++) {
+            if (data.visitedTeams[startlist[i].id]) continue;
+            $('#app').add(getTeamDiv(startlist[i], teamStart, [i, startlist[i].id]));
+        }
+
+        $('#app').add(getSubsection());
+        $('#app').add(getButton('', 'Back', runProgress, []));
+
+    }
+
+
+    function displayTeamListPage(header, mode) {
+        changePage(header);
+        $('#app').add(getTeamList(mode));
+        $('#app').add(getSubsection());
+        $('#app').add(getButton('', 'Back', runProgress, []));
+    }
+
+
+    function getTeamList(mode) {
+        var data = JSON.parse(localStorage.getItem(currentSessionKey));
+        var cont = EE('div', {id: 'team-list'});
+
+        for (var i = 0; i < data.teams.length; i++) {
+            var team = data.teams[i];
+
+            if (mode == LIST_MODE.active && team.timeIn !== null && team.timeOut === null) {
+                cont.add(getTeamDiv(team, confirmTeamEnd, [i, team.id]));
+            } else if (mode == LIST_MODE.past && team.timeOut !== null) {
+                cont.add(getTeamDiv(data.teams[i]));
+            }
+        }
+
+        return cont;
     }
 
 
     function teamStart(index, teamId) {
         var data = JSON.parse(localStorage.getItem(currentSessionKey));
 
-        if (data.teams[index].id != teamId) {
+        if (startlist[index].id != teamId) {
             console.log('Error');
             return;
         }
 
-        data.teams[index].timeIn = new Date();
+        var i = data.teams.push(GetTeamObj(startlist[index]));
+        i--;
+        data.teams[i].timeIn = new Date();
+        data.visitedTeams[teamId] = true;
+        saveSessionData('visitedTeams', data.visitedTeams, true);
         saveSessionData('teams', data.teams, true);
 
+
         runProgress();
+    }
+
+
+    function confirmTeamEnd(index, teamId) {
+        changePage('Team leaving');
+
+        var data = JSON.parse(localStorage.getItem(currentSessionKey));
+
+        // $('#app').add(getButton(teamId, data.teams[index].name, null, []));
+        $('#app').add(getTeamDiv(data.teams[index]));
+        $('#app').add(getButton('Confirm', '', teamEnd, [index, teamId]));
+        $('#app').add(getButton('', 'Back', runProgress, []));
     }
 
 
@@ -215,7 +308,7 @@ $(function() {
 
         // start count
         $('#app').add(getSubsection('Teams'));
-        var teamCountInput = EE('input', {'type': 'text'}).set('value', data.startedCount?data.startedCount:app.defaultCount);
+        var teamCountInput = EE('input', {'type': 'text'}).set('value', data.startedCount);
         teamCountInput.onChange(function(input) {
             saveSessionData('startedCount', input, true);
         });
@@ -225,11 +318,12 @@ $(function() {
 
         $('#app').add(getSubsection('Start Time'));
 
-        var startTimeInput = EE('input', {'type': 'text'}).set('value', _.formatValue('HH:mm', data.startedTime?(new Date(data.startedTime)):app.defaultStartTime));
+        var startTimeInput = EE('input', {'type': 'text'}).set('value', _.formatValue('HH:mm', new Date(data.startedTime)));
         startTimeInput.onChange(function(input) {
             startTime = _.parseDate('YYMMdd HH:mm', _.formatValue('YYMMdd', app.defaultStartTime) + ' ' + input);
             if (startTime !== null && startTime !== undefined) {
                 saveSessionData('startedTime', startTime, true);
+                currentSessionStart = startTime;
             }
         });
         $('#app').add(startTimeInput);
@@ -304,13 +398,37 @@ $(function() {
     }
 
 
-    function getButton(header, body, callback, params) {
-        var btn = EE('div', {$: 'btn'}, [EE('span', {$: 'btn-head'}, header), EE('span', {$: 'btn-body'}, body)]);
-        if (callback !== null) {
-            btn.onClick(callback, params);
+    function getButton(header, body, action, params) {
+        var btn = EE('div', {$: 'btn btn-full'}, [EE('span', {$: 'btn-head'}, header), EE('span', {$: 'btn-body'}, body)]);
+        if (action !== null) {
+            btn.onClick(action, params);
         }
 
         return btn;
+    }
+
+
+    function getTeamDiv(team, action, params) {
+        var teamDiv = EE('div', {$: 'team'}, [
+                EE('span', {$: 'id'}, team.id),
+                EE('span', {$: 'name'}, team.name),
+                EE('span', {$: 'time'})
+            ]);
+
+        if (team.timeIn !== null) {
+            teamDiv.set('%timeIn', team.timeIn);
+        }
+
+        if (team.timeOut !== null) {
+            teamDiv.set('%timeOut', team.timeOut);
+        }
+
+        if (action) {
+            teamDiv.onClick(action, params);
+            teamDiv.set('+btn');
+        }
+
+        return teamDiv;
     }
 
 })(App);

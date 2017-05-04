@@ -4,12 +4,15 @@ body {
 }
 
 .btn {
+    cursor: hand;
+    border: 1px solid #ccc;
+    
+}
+
+.btn-full {
     width: calc(100% - 40px);
     padding: 10px;
     margin: 10px;
-    cursor: hand;
-    /*text-align: center;*/
-    border: 1px solid #ccc;
 }
 
 .btn-head {
@@ -20,4 +23,33 @@ body {
 
 .btn-body {
     font-size: 1.0em;
+}
+
+.team {
+    width: calc(100% - 40px);
+    padding: 10px;
+    margin: 10px;
+    border-bottom: 1px solid #ccc;
+}
+
+.team .name {
+    color: #666;
+    /*color: red;*/
+    /*border: 1px solid red;*/
+}
+
+.team .id {
+    font-weight: bold;
+    padding: 10px 20px;
+    /*border: 1px solid blue;*/
+}
+
+.team .time {
+    display: inline-block;
+    /*border: 1px solid yellow;*/
+}
+
+
+.warning {
+    background-color: red;
 }
