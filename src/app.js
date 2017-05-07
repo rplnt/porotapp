@@ -2,19 +2,21 @@ var MINI = require('minified');
 var _=MINI._, $=MINI.$, $$=MINI.$$, EE=MINI.EE, HTML=MINI.HTML;
 
 var App = {
-    defaultStartTime: new Date('2017-05-04T16:00:00.000+02:00'),
+    defaultStartTime: (new Date()).setHours(16, 0), /* always today, session settings would overwite */
     defaultCount: 50,
     year: new Date().getFullYear(),
     sessionsKey: 'PBBSessions' + this.year,
+    runDurationHours: 4,
 };
 
 $(function() {
     $('body').fill([
-        EE('div', {id: 'header'}, [
+        EE('div', {$: 'head', id: 'header'}, [
             EE('span', {$: 'title'}),
+            // EE('span', {$: 'status'}),
             EE('span', {$: 'timer'})
         ]),
-        EE('div', {id: 'app'})
+        EE('div', {id: 'app', $: 'app-container'})
     ]);
 
     App.Init();
@@ -37,6 +39,7 @@ $(function() {
         if (timeRepeater) {
             clearInterval(timeRepeater);
             timeRepeater = false;
+            $('#header .timer').fill();
         }
 
         /* Select session */
@@ -52,8 +55,11 @@ $(function() {
     };
 
 
-    function changePage(title) {
+    function changePage(title, status) {
         $('#header .title').fill(title);
+        if (status !== undefined && status !== null) {
+            $('#header .status').fill(title);
+        }
         $('#app').fill();
     }
 
@@ -133,7 +139,7 @@ $(function() {
 
 
     function runProgress() {
-        changePage(currentStopName);
+        changePage(/*'⛽ ' + */ currentStopName);
 
         var data = JSON.parse(localStorage.getItem(currentSessionKey));
 
@@ -161,22 +167,34 @@ $(function() {
         return clocks[Math.floor(hour) % 12];
     }
 
+    function Sec2Hr(seconds) {
+        return Math.floor(seconds/(60*60));
+    }
+
     function Sec2Min(seconds) {
         return Math.floor(seconds/60);
     }
 
     function Sec2Sec(seconds) {
         var minutes = Math.floor(seconds/60);
-        return _.pad(2, seconds - (minutes * 60));
+        return seconds - (minutes * 60);
     }
 
-    function Sec2MinSec(seconds) {
-        var stamp = ClockOClock(seconds);
+    function Sec2MinSec(seconds, stamp) {
+        if (stamp === undefined) stamp = '';
         if (Sec2Min(seconds) > 0) {
             stamp += (Sec2Min(seconds) + 'm ');
         }
 
         return stamp + Sec2Sec(seconds) + 's';
+    }
+
+    function Sec2HrMinSec(seconds) {
+        var hrms = ClockOClock(seconds) + ' ';
+        hrms += Sec2Hr(seconds) + ':';
+        hrms += (_.pad(2, Sec2Min(seconds) - Sec2Hr(seconds)*60) + ':');
+        hrms += _.pad(2, Sec2Sec(seconds));
+        return hrms;
     }
 
 
@@ -186,30 +204,24 @@ $(function() {
         /* header */
         if (currentSessionStart !== null) {
             var diff = parseInt((now - new Date(currentSessionStart)) / 1000, 10);
-            var minutes = Math.floor(diff/60);
+            var minutes = Sec2Min(diff);
             if (minutes < 0)  {
                 minutes = Math.abs(minutes);
-                $('#header .timer').set('innerHTML', 'Starts in ' + minutes + ' minute' + (minutes==1?'':'s'));
+                $('#header .timer').fill('Starts in ' + minutes + ' minute' + (minutes==1?'':'s'));
+            } else if (Sec2Hr(diff) > app.runDurationHours) {
+                $('#header .timer').fill('💊');
             } else {
-                $('#header .timer').set('innerHTML', _.pad(2, minutes) + ':' + _.pad(2, diff - (minutes * 60)));
+                $('#header .timer').fill(Sec2HrMinSec(diff));
             }
         }
 
         /* times in team lists */
-        $('#team-list .team').per(function (elmnt, index) {
+        $('#team-list-active .team').per(function (elmnt, index) {
             var timeIn = elmnt.get('%timeIn');
-            var timeOut = elmnt.get('%timeOut');
-            if (timeIn) {
-                var diff;
-                if (timeOut) {
-                    diff = _.dateDiff('seconds', new Date(timeIn), new Date(timeOut));
-                    $('.time-out', elmnt).set('innerHTML', _.formatValue('HH:mm', new Date(timeOut)));
-                } else {
-                    diff = parseInt((now - new Date(timeIn)) / 1000, 10);
-                }
+            if (!timeIn) return;
 
-                $('.time-diff', elmnt).set('innerHTML',  Sec2MinSec(diff));
-            }
+            var diff = parseInt((now - new Date(timeIn)) / 1000, 10);
+            $('.time-diff', elmnt).fill(Sec2MinSec(diff));
         });
 
     }
@@ -245,11 +257,14 @@ $(function() {
             $('#app').add(EE('span', {$: 'warning'}, 'How Can She Drink?!'));
         }
 
+        var teamTable = EE('table', {$: 'team-table'});
+
         for (var i = 0; i < startlist.length; i++) {
             if (data.visitedTeams[startlist[i].id]) continue;
-            $('#app').add(getTeamDiv(startlist[i], teamStart, [i, startlist[i].id]));
+            teamTable.add(getTeamRow(startlist[i], teamStart, [i, startlist[i].id]));
         }
 
+        $('#app').add(teamTable);
         $('#app').add(getSubsection());
         $('#app').add(getButton('', 'Back', runProgress, []));
 
@@ -266,19 +281,19 @@ $(function() {
 
     function getTeamList(mode) {
         var data = JSON.parse(localStorage.getItem(currentSessionKey));
-        var cont = EE('div', {id: 'team-list'});
+        var teamList = EE('table', {id: 'team-list' + ((mode == LIST_MODE.active)?'-active':''), $: 'team-table'});
 
         for (var i = 0; i < data.teams.length; i++) {
             var team = data.teams[i];
 
             if (mode == LIST_MODE.active && team.timeIn !== null && team.timeOut === null) {
-                cont.add(getTeamDiv(team, confirmTeamEnd, [i, team.id]));
+                teamList.add(getTeamRow(team, confirmTeamEnd, [i, team.id]));
             } else if (mode == LIST_MODE.past && team.timeOut !== null) {
-                cont.add(getTeamDiv(data.teams[i]));
+                teamList.add(getTeamRow(data.teams[i]));
             }
         }
 
-        return cont;
+        return teamList;
     }
 
 
@@ -307,7 +322,7 @@ $(function() {
 
         var data = JSON.parse(localStorage.getItem(currentSessionKey));
 
-        $('#app').add(EE('div', {id: 'team-list'}, getTeamDiv(data.teams[index])));
+        $('#app').add(EE('table', {id: 'team-list-active', $: 'team-table'}, getTeamRow(data.teams[index])));
         $('#app').add(getButton('Confirm', '', teamEnd, [index, teamId]));
         $('#app').add(getButton('', 'Back', runProgress, []));
     }
@@ -342,12 +357,11 @@ $(function() {
         $('#app').add(teamCountInput);
 
         // start time
-
         $('#app').add(getSubsection('Start Time'));
 
         var startTimeInput = EE('input', {'type': 'text'}).set('value', _.formatValue('HH:mm', new Date(data.startedTime)));
         startTimeInput.onChange(function(input) {
-            startTime = _.parseDate('YYMMdd HH:mm', _.formatValue('YYMMdd', app.defaultStartTime) + ' ' + input);
+            startTime = _.parseDate('YYMMdd HH:mm', _.formatValue('YYMMdd', new Date()) + ' ' + input);
             if (startTime !== null && startTime !== undefined) {
                 saveSessionData('startedTime', startTime, true);
                 currentSessionStart = startTime;
@@ -435,48 +449,34 @@ $(function() {
     }
 
 
-    function getTeamDiv(team, action, params) {
-        var teamDiv = EE('div', {$: 'team'}, [
-                EE('span', {$: 'id'}, team.id),
-                EE('span', {$: 'name'}, team.name),
-                EE('span', {$: 'time-out'}),
-                EE('span', {$: 'time-diff'})
-            ]);
-
-        if (team.timeIn !== null) {
-            teamDiv.set('%timeIn', team.timeIn);
-        }
-
-        if (team.timeOut !== null) {
-            teamDiv.set('%timeOut', team.timeOut);
-        }
-
-        if (action) {
-            teamDiv.onClick(action, params);
-            teamDiv.set('+btn');
-        }
-
-        return teamDiv;
-    }
-
-
     function getTeamRow(team, action, params) {
-        var teamRow = EE('div', {$: 'team'}, [
-                EE('tr', EE('span', {$: 'id'}, team.id)),
-                EE('tr', {$: 'name'}, team.name),
-                EE('tr', {$: 'times'}, [
-                    EE('span', {$: 'time-in'}),
-                    EE('span', {$: 'time-out'})
-                ]),
-                EE('tr', {$: 'time-diff'})
-            ]);
+        var teamRow = EE('tr', {$: 'team'});
 
-        if (team.timeIn !== null) {
+        var times = EE('td', {$: 'times'}, [
+                    EE('div', {$: 'time-in'}, '--:--'),
+                    EE('div', {$: 'time-out'}, '--:--')
+                ]);
+
+        if (team.timeIn) {
             teamRow.set('%timeIn', team.timeIn);
+            $('.time-in', times).fill(_.formatValue('HH:mm', new Date(team.timeIn)));
         }
 
-        if (team.timeOut !== null) {
+        if (team.timeOut) {
             teamRow.set('%timeOut', team.timeOut);
+            $('.time-out', times).fill(_.formatValue('HH:mm', new Date(team.timeOut)));
+        }
+
+
+        teamRow.add(EE('td', EE('span', {$: 'team-id'}, team.id)));
+        teamRow.add(EE('td', {$: 'name'}, team.name));
+        teamRow.add(times);
+        teamRow.add(EE('td', {$: 'time-diff'}));
+
+        if (team.timeIn) {
+            var outDate = team.timeOut?(new Date(team.timeOut)):(new Date());
+            var diff = parseInt((outDate - new Date(team.timeIn)) / 1000, 10);
+            $('.time-diff', teamRow).fill(Sec2MinSec(diff));
         }
 
         if (action) {

@@ -25,44 +25,48 @@ body {
     font-size: 1.0em;
 }
 
-.team {
-    width: calc(100% - 40px);
-    padding: 10px;
-    margin: 10px;
-    position: relative;
-    /*border-bottom: 1px solid #ccc;*/
-}
-
-.team .id {
-    position: absolute;
+.head {
+    width: 100%;
+    position: fixed;
     left: 0;
-    text-align: center;
-    border-radius: 10% 30%;
+    top: 0;
+    overflow: hidden;
+}
+
+.head span {
+    padding: 4px 16px;
+    display: block;
+}
+
+.head .title {
+    float: left;
+}
+
+.head .timer {
+    float: right;
+}
+
+.app-container {
+    margin-top: 3ch;
+}
+
+.team-table {
+    width: calc(100% - 40px);
+    padding: 0 10px;
+    margin: 0 10px;
+}
+
+.team-id {
+    float: left;
     width: 3ch;
+    border-radius: 10% 30%;
     background: #ddd;
+    text-align: center;
 }
 
-.team .name {
-    color: #666;
-    position: absolute;
-    left: 10%;
-    /*color: red;*/
-    /*border: 1px solid red;*/
-}
-
-.team .time-diff {
-    position: absolute;
-    right: 0;
-    padding-right: 10px;
-    /*display: inline-block;*/
-    /*text-align: right;*/
-    border: 1px solid green;
-}
-
-.team .time-out {
-    /*display: inline-block;*/
-    /*text-align: right;*/
-    /*border: 1px solid pink;*/
+.time-in, .time-out {
+    color: #aaa;
+    font-size: 50%;
 }
 
 
