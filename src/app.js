@@ -138,7 +138,7 @@ $(function() {
         var data = JSON.parse(localStorage.getItem(currentSessionKey));
 
         // add team
-        $('#app').add(getButton('Add Team', data.startedCount - teamCategoryCount(true, true) + ' out of ' + data.startedCount + ' teams remaining', addNewTeam, []));
+        $('#app').add(getButton('⨭Add Team', data.startedCount - teamCategoryCount(true, true) + ' out of ' + data.startedCount + ' teams remaining', addNewTeam, []));
 
         if (data.teams !== undefined && data.teams !== null) {
             $('#app').add(getSubsection('Drinking (' + teamCategoryCount(true, false) + ')'));
@@ -155,23 +155,33 @@ $(function() {
         updateTimers();
     }
 
+    /* Time Helpers */
+    function ClockOClock(hour) {
+        var clocks = ['🕛', '🕐', '🕑', '🕒', '🕓', '🕔', '🕕', '🕖', '🕗',  '🕘',  '🕙',  '🕚'];
+        return clocks[Math.floor(hour) % 12];
+    }
+
+    function Sec2Min(seconds) {
+        return Math.floor(seconds/60);
+    }
+
+    function Sec2Sec(seconds) {
+        var minutes = Math.floor(seconds/60);
+        return _.pad(2, seconds - (minutes * 60));
+    }
+
+    function Sec2MinSec(seconds) {
+        var stamp = ClockOClock(seconds);
+        if (Sec2Min(seconds) > 0) {
+            stamp += (Sec2Min(seconds) + 'm ');
+        }
+
+        return stamp + Sec2Sec(seconds) + 's';
+    }
+
 
     function updateTimers() {
         var now = new Date();
-
-        /* times in team lists */
-        $('#team-list .team').per(function (elmnt, index) {
-            var timeIn = elmnt.get('%timeIn');
-            var timeOut = elmnt.get('%timeOut');
-            if (timeIn && !timeOut) {
-                var diff = parseInt((now - new Date(timeIn)) / 1000, 10);
-                var minutes = Math.floor(diff/60);
-                $('.time', elmnt).set('innerHTML',  (minutes>0?(minutes + 'm '):'') + _.pad(2, diff - (minutes * 60)) + 's');
-            } else if (timeIn && timeOut) {
-                /* passed teams */
-                $('.time', elmnt).set('innerHTML', _.formatValue('HH:mm', new Date(timeOut)));
-            }
-        });
 
         /* header */
         if (currentSessionStart !== null) {
@@ -184,6 +194,24 @@ $(function() {
                 $('#header .timer').set('innerHTML', _.pad(2, minutes) + ':' + _.pad(2, diff - (minutes * 60)));
             }
         }
+
+        /* times in team lists */
+        $('#team-list .team').per(function (elmnt, index) {
+            var timeIn = elmnt.get('%timeIn');
+            var timeOut = elmnt.get('%timeOut');
+            if (timeIn) {
+                var diff;
+                if (timeOut) {
+                    diff = _.dateDiff('seconds', new Date(timeIn), new Date(timeOut));
+                    $('.time-out', elmnt).set('innerHTML', _.formatValue('HH:mm', new Date(timeOut)));
+                } else {
+                    diff = parseInt((now - new Date(timeIn)) / 1000, 10);
+                }
+
+                $('.time-diff', elmnt).set('innerHTML',  Sec2MinSec(diff));
+            }
+        });
+
     }
 
 
@@ -214,7 +242,7 @@ $(function() {
         var data = JSON.parse(localStorage.getItem(currentSessionKey));
 
         if ((new Date() - new Date(currentSessionStart)) < 0) {
-            $('#app').add(EE('span', {$: 'warning'}, 'Teams can\'t drink before start!'));
+            $('#app').add(EE('span', {$: 'warning'}, 'How Can She Drink?!'));
         }
 
         for (var i = 0; i < startlist.length; i++) {
@@ -279,8 +307,7 @@ $(function() {
 
         var data = JSON.parse(localStorage.getItem(currentSessionKey));
 
-        // $('#app').add(getButton(teamId, data.teams[index].name, null, []));
-        $('#app').add(getTeamDiv(data.teams[index]));
+        $('#app').add(EE('div', {id: 'team-list'}, getTeamDiv(data.teams[index])));
         $('#app').add(getButton('Confirm', '', teamEnd, [index, teamId]));
         $('#app').add(getButton('', 'Back', runProgress, []));
     }
@@ -412,7 +439,8 @@ $(function() {
         var teamDiv = EE('div', {$: 'team'}, [
                 EE('span', {$: 'id'}, team.id),
                 EE('span', {$: 'name'}, team.name),
-                EE('span', {$: 'time'})
+                EE('span', {$: 'time-out'}),
+                EE('span', {$: 'time-diff'})
             ]);
 
         if (team.timeIn !== null) {
@@ -430,5 +458,34 @@ $(function() {
 
         return teamDiv;
     }
+
+
+    function getTeamRow(team, action, params) {
+        var teamRow = EE('div', {$: 'team'}, [
+                EE('tr', EE('span', {$: 'id'}, team.id)),
+                EE('tr', {$: 'name'}, team.name),
+                EE('tr', {$: 'times'}, [
+                    EE('span', {$: 'time-in'}),
+                    EE('span', {$: 'time-out'})
+                ]),
+                EE('tr', {$: 'time-diff'})
+            ]);
+
+        if (team.timeIn !== null) {
+            teamRow.set('%timeIn', team.timeIn);
+        }
+
+        if (team.timeOut !== null) {
+            teamRow.set('%timeOut', team.timeOut);
+        }
+
+        if (action) {
+            teamRow.onClick(action, params);
+            teamRow.set('+btn');
+        }
+
+        return teamRow;
+    }
+
 
 })(App);
