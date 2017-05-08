@@ -3,7 +3,6 @@ var _=MINI._, $=MINI.$, $$=MINI.$$, EE=MINI.EE, HTML=MINI.HTML;
 
 var App = {
     defaultStartTime: (new Date()).setHours(16, 0), /* always today, session settings would overwite */
-    defaultCount: 50,
     year: new Date().getFullYear(),
     sessionsKey: 'PBBSessions' + this.year,
     runDurationHours: 4,
@@ -12,8 +11,8 @@ var App = {
 $(function() {
     $('body').fill([
         EE('div', {$: 'head', id: 'header'}, [
+            EE('span', {$: 'name'}),
             EE('span', {$: 'title'}),
-            // EE('span', {$: 'status'}),
             EE('span', {$: 'timer'})
         ]),
         EE('div', {id: 'app', $: 'app-container'})
@@ -32,6 +31,7 @@ $(function() {
 
     app.Init = function() {
         changePage('Session Manager');
+        $('#header .name').fill('');
         currentSessionKey = null;
         currentStopName = false;
         currentSessionStart = null;
@@ -108,7 +108,7 @@ $(function() {
         currentSessionKey = key;
 
         /* fill in defaults */
-        if (!data.startedCount) saveSessionData('startedCount', app.defaultCount, false);
+        if (!data.startedCount) saveSessionData('startedCount', startlist.length, false);
         if (!data.startedTime) {
             saveSessionData('startedTime', app.defaultStartTime, false);
             currentSessionStart = app.defaultStartTime;
@@ -122,6 +122,7 @@ $(function() {
             stopSelection();
         } else {
             currentStopName = data.stop;
+            $('#header .name').fill(currentStopName);
             timeRepeater = setInterval(updateTimers, 1000);
             runProgress();
         }
@@ -131,7 +132,7 @@ $(function() {
     function GetTeamObj(team) {
         return {
             id: team.id,
-            name: team.name.substring(0, 20),
+            name: team.name,//.substring(0, 20),
             timeIn: null,
             timeOut: null
         };
@@ -139,7 +140,7 @@ $(function() {
 
 
     function runProgress() {
-        changePage(/*'⛽ ' + */ currentStopName);
+        changePage('⛽ ');
 
         var data = JSON.parse(localStorage.getItem(currentSessionKey));
 
@@ -206,8 +207,8 @@ $(function() {
             var diff = parseInt((now - new Date(currentSessionStart)) / 1000, 10);
             var minutes = Sec2Min(diff);
             if (minutes < 0)  {
-                minutes = Math.abs(minutes);
-                $('#header .timer').fill('Starts in ' + minutes + ' minute' + (minutes==1?'':'s'));
+                // minutes = Math.abs(minutes);
+                $('#header .timer').fill('T' + minutes + ' min' + (minutes==1?'':'s'));
             } else if (Sec2Hr(diff) > app.runDurationHours) {
                 $('#header .timer').fill('💊');
             } else {
@@ -468,8 +469,8 @@ $(function() {
         }
 
 
-        teamRow.add(EE('td', EE('span', {$: 'team-id'}, team.id)));
-        teamRow.add(EE('td', {$: 'name'}, team.name));
+        teamRow.add(EE('td', {$: 'id'}, EE('span', {$: 'team-id'}, team.id)));
+        teamRow.add(EE('td', {$: 'name'}, EE('span', {$: 'team-name'}, team.name)));
         teamRow.add(times);
         teamRow.add(EE('td', {$: 'time-diff'}));
 
