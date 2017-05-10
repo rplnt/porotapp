@@ -9,13 +9,15 @@ body {
 .app-container {
     width: 100%;
     margin: 0px;
-    margin-top: 1.5em;
+    margin-top: 1.6em;
 }
 
 .head {
     width: 100%;
     height: 1.5em;
+    font-size: 1.2em;
     position: fixed;
+    z-index: 666;
     left: 0;
     top: 0;
     overflow: hidden;
@@ -48,7 +50,7 @@ body {
 
 .team-table {
     width: calc(100% - 20px);
-    padding: 0 5px;
+    padding: 10px;
     margin: 0 5px;
     table-layout: fixed;
 }
@@ -68,6 +70,10 @@ body {
     text-align: center;
     font-weight: bold;
     color: white;
+}
+
+.arrow {
+    background-color: #FF6A00;
 }
 
 .team .name {
@@ -95,6 +101,20 @@ body {
 
 .hidden {
     display: none;
+
+}
+
+.divider-row {
+    font-size: 1.2em;
+    line-height: 2;
+    width: 3ch;
+
+}
+
+.divider-row span {
+    cursor: pointer;
+    padding: 10px;
+    margin: 5px;    
 }
 
 .times {
@@ -124,7 +144,7 @@ body {
 }
 
 .btn {
-    cursor: hand;
+    cursor: pointer;
 }
 
 .btn-full {

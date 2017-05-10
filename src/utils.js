@@ -30,7 +30,7 @@
     };
 
     app.Sec2HrMinSec = function(seconds) {
-        var hrms = ClockOClock(seconds) + ' ';
+        var hrms = ''; // = ClockOClock(seconds) + ' ';
         hrms += Sec2Hr(seconds) + ':';
         hrms += (_.pad(2, Sec2Min(seconds) - Sec2Hr(seconds)*60) + ':');
         hrms += _.pad(2, Sec2Sec(seconds));

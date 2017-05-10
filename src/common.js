@@ -1,7 +1,7 @@
 
 (function(app) {
 
-	app.LIST_MODE = {active: 0, past: 1};
+    app.LIST_MODE = {active: 0, past: 1};
 
     app.changePage = function (title, status) {
         $('#header .title').fill(title);
@@ -79,8 +79,19 @@
         }
 
         if (action) {
-            teamRow.onClick(action, params);
+            if (params) {
+                teamRow.onClick(action, params);
+            } else {
+                teamRow.onClick(action);
+            }
             teamRow.set('+btn');
+        }
+
+        /* special case for collapser */
+        if (Number.isInteger(team.id)) {
+            teamRow.set('%group', Math.floor(team.id/10));
+        } else {
+            $('.team-id', teamRow).set('+arrow');
         }
 
         return teamRow;

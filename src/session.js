@@ -37,8 +37,6 @@
         if (currentSessionStart !== null) {
             var diff = parseInt((now - new Date(currentSessionStart)) / 1000, 10);
             if (diff < 0)  {
-                // minutes = Math.abs(minutes);
-                // $('#header .timer').fill('T' + minutes + ' min' + (minutes==1?'':'s'));
                 $('#header .timer').fill('T-' + app.Sec2MinSec(diff));
             } else if (diff/(60*60) > app.runDurationHours) {
                 $('#header .timer').fill('💊');

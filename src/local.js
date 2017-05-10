@@ -23,7 +23,7 @@
 
 
         $('#app').add(app.getSubsection());
-        $('#app').add(app.getButton('', 'Visited list (' + teamCategoryCount(false, true) + ')', displayTeamListPage, ['Teams Visited', app.LIST_MODE.past]));
+        $('#app').add(app.getButton('', 'Visited list (' + teamCategoryCount(false, true) + ')', displayTeamListPage, ['Visited', app.LIST_MODE.past]));
         $('#app').add(app.getSubsection());
         $('#app').add(app.getButton('', 'Session Settings', app.configCurrentSession, []));
         $('#app').add(app.getButton('', 'Home', App.Init, []));
@@ -32,8 +32,24 @@
     };
 
 
+    function toggleRows(evnt, index) {
+        if ($('.arrow', this[index]).get('innerHTML') == '►') {
+            $('.arrow', this[index]).fill('▼');
+        } else {
+            $('.arrow', this[index]).fill('►');
+        }
+        var row = $(this[index]).next('tr');
+        var group = $(row).get('%group');
+        var lmt = 0;
+        for (var i = 0; i < 10 && group == $(row).get('%group'); i++) {
+            $(row).set('hidden');
+            row = $(row).next('tr');
+        }
+    }
+
+
     function addNewTeam() {
-        app.changePage('New Team');
+        app.changePage('Teams');
         var data = JSON.parse(localStorage.getItem(app.currentSessionKey));
 
         if ((new Date() - new Date(app.getCurrentSessionStart())) < 0) {
@@ -42,9 +58,16 @@
 
         var teamTable = EE('table', {$: 'team-table'});
 
+        // startlist must be ordered!
+        var lastBreak = -1;
         for (var i = 0; i < startlist.length; i++) {
             if (data.visitedTeams[startlist[i].id]) continue;
-            teamTable.add(app.getTeamRow(startlist[i], teamStart, [i, startlist[i].id]));
+            if (Math.floor(startlist[i].id / 10) > lastBreak) {
+                lastBreak = Math.floor(startlist[i].id / 10);
+                var divRow = app.getTeamRow({name: ((lastBreak * 10) + ' - ' + (lastBreak * 10 + 9)), id: '►'}, toggleRows);
+                teamTable.add(divRow);
+            }
+            teamTable.add(app.getTeamRow(startlist[i], teamStart, [i, startlist[i].id]).set('+hidden'));
         }
 
         $('#app').add(teamTable);
