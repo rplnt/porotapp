@@ -7,7 +7,6 @@
 
     app.Init = function() {
         app.changePage('Sessions', null, '#sessions');
-        // location.hash = '#sessions';
         $('#header .name').fill('');
         app.currentSessionKey = null;
         currentStopName = false;
@@ -104,7 +103,6 @@
 
     function stopSelection() {
         app.changePage('Select stop', null, '#stops');
-        // location.hash = '#stops';
 
         selectStop = function(stopName) {
             app.saveSessionData('stop', stopName);
@@ -175,7 +173,6 @@
 
     function deleteSessionConfirm(key) {
         app.changePage('Delete session "' + key + '"?', null, '#deletesession');
-        // location.hash = '#deletesession';
         $('#app').add(app.getButton('Delete', 'This action cannot be reversed (maybe)', deleteSession, [key]));
         $('#app').add(app.getButton('', 'Home', app.Init, []));
     }

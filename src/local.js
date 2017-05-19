@@ -6,7 +6,6 @@
 
     app.Local = function() {
         app.changePage('⛽ ', null, '#main');
-        // location.hash = '#main';
 
         if (!localTimeUpdater) {
             localTimeUpdater = setInterval(updateLocalTimers, 1000);
@@ -120,7 +119,6 @@
 
     function confirmTeamEnd(index, teamId) {
         app.changePage('Team End', null, '#confirmend');
-        // location.hash = '#confirmend';
 
         var data = JSON.parse(localStorage.getItem(app.currentSessionKey));
 
@@ -156,7 +154,6 @@
 
     function confirmDisqualify(index, teamId) {
         app.changePage('Disqualify', null, '#disqualify');
-        // location.hash = '#disqualify';
 
         var data = JSON.parse(localStorage.getItem(app.currentSessionKey));
         $('#app').add(EE('table', {id: 'team-list-active', $: 'team-table'}, app.getTeamRow(data.teams[index])));
@@ -180,7 +177,6 @@
 
     function displayTeamListPage(header, mode) {
         app.changePage(header, null, '#teamlist');
-        // location.hash = '#teamlist';
         $('#app').add(getTeamList(mode));
         $('#app').add(app.getSubsection());
         $('#app').add(app.getButton('', 'Back', app.Local, []));

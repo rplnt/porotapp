@@ -22,8 +22,6 @@ window.onhashchange = function() {
 
     app.LIST_MODE = {active: 0, past: 1};
 
-    // app.currentHash = '';
-
     function changeHash(hash) {
         app.currentHash = hash;
         location.hash = hash;
