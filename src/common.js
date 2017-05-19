@@ -1,9 +1,38 @@
+// TODO rewrite
+window.onhashchange = function() {
+        if (location.hash != App.currentHash) {
+            switch (location.hash) {
+                case '#main':
+                case '#confirmed':
+                    App.Local();
+                    break;
+                case '#sessions':
+                    App.Init();
+                    break;
+                case '#settings':
+                    App.configCurrentSession();
+                    break;
+                default:
+                    break;
+            }
+        }
+};
 
 (function(app) {
 
     app.LIST_MODE = {active: 0, past: 1};
 
-    app.changePage = function (title, status) {
+    // app.currentHash = '';
+
+    function changeHash(hash) {
+        app.currentHash = hash;
+        location.hash = hash;
+    }
+
+    app.changePage = function (title, status, hash) {
+        if (hash !== undefined) {
+            changeHash(hash);
+        }
         $('#header .title').fill(title);
         if (status !== undefined && status !== null) {
             $('#header .status').fill(title);

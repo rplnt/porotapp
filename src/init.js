@@ -7,6 +7,7 @@ var App = {
     year: new Date().getFullYear(),
     sessionsKey: 'PBBSessions' + this.year,
     runDurationHours: 4,
+    currentHash: '',
 };
 
 
