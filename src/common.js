@@ -115,7 +115,7 @@ window.onhashchange = function() {
         }
 
         /* special case for collapser */
-        if (parseInt(team.id) > 0) {
+        if (parseInt(team.id, 10) > 0) {
             teamRow.set('%group', Math.floor(team.id/10));
         } else {
             $('.team-id', teamRow).set('+arrow');
