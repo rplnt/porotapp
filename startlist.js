@@ -114,5 +114,37 @@ var startlist = [
     {
         id: 31,
         name: 'Dávej Dávej'
+    },
+    {
+        id: 32,
+        name: 'Duranga vole;Deli'
+    },
+    {
+        id: 33,
+        name: '2 Guys 14 Beers;Davča'
+    },
+    {
+        id: 34,
+        name: 'Võileib või võisai;Nisu'
+    },
+    {
+        id: 35,
+        name: 'Džehovis;Bedna'
+    },
+    {
+        id: 36,
+        name: 'DosAlcoholico;Sídžjej'
+    },
+    {
+        id: 37,
+        name: ''
+    },
+    {
+        id: 39,
+        name: ''
+    },
+    {
+        id: 40,
+        name: ''
     }
 ];
