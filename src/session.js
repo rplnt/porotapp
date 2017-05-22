@@ -152,6 +152,7 @@
 
         // dump to json
         $('#app').add(app.getButton('', 'Dump current session to json', dumpCurrentSession, [app.currentSessionKey]));
+        $('#app').add(app.getButton('', 'Show current session in json', showRawSession, [app.currentSessionKey]));
 
 
         // remove
@@ -168,6 +169,13 @@
         var strData = 'data:text/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(data, null, 4));
         $('#app').add(EE('a', {'href': strData, 'download': key + '.json', id: 'json-download'}, ''));
         $$('#json-download').click();
+    }
+
+
+    function showRawSession(key) {
+        var data = JSON.parse(localStorage.getItem(key));
+        var strData = JSON.stringify(data, null, 4);
+        $('#app').fill(strData);
     }
 
 
