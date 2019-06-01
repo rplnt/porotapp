@@ -1,154 +1,31 @@
 var startlist = [
-    {
-        id: 1,
-        name: 'Beerturisti'
-    },
-    {
-        id: 2,
-        name: 'Rychle Pipy'
-    },
-    {
-        id: 3,
-        name: 'Triglav'
-    },
-    {
-        id: 4,
-        name: 'Triezvych nas nedostanu'
-    },
-    {
-        id: 5,
-        name: 'Dnes bez Míry'
-    },
-    {
-        id: 6,
-        name: 'Jižní Ogaři'
-    },
-    {
-        id: 7,
-        name: 'BelCzech'
-    },
-    {
-        id: 8,
-        name: 'Turbo Šneci'
-    },
-    {
-        id: 9,
-        name: 'Beerfoot Vol.2'
-    },
-    {
-        id: 10,
-        name: 'Bedlaři'
-    },
-    {
-        id: 11,
-        name: 'Lážo Plážo'
-    },
-    {
-        id: 12,
-        name: 'Lachtani'
-    },
-    {
-        id: 13,
-        name: 'The Gods of Pijeto'
-    },
-    {
-        id: 14,
-        name: 'Laďa běží za svobodu!'
-    },
-    {
-        id: 15,
-        name: 'Svoboda běží od Ladi!'
-    },
-    {
-        id: 16,
-        name: 'OLAFIT'
-    },
-    {
-        id: 18,
-        name: 'Vranovice'
-    },
-    {
-        id: 19,
-        name: 'Bukvice běží za Laďu!'
-    },
-    {
-        id: 20,
-        name: 'Exovači'
-    },
-    {
-        id: 21,
-        name: 'Pacienti'
-    },
-    {
-        id: 22,
-        name: 'Kokoti bez facebooku'
-    },
-    {
-        id: 23,
-        name: 'Pivmajstři'
-    },
-    {
-        id: 24,
-        name: 'Klub milovníků vyšívání'
-    },
-    {
-        id: 25,
-        name: 'Popičisti'
-    },
-    {
-        id: 26,
-        name: 'Burani'
-    },
-    {
-        id: 28,
-        name: 'Ani ne'
-    },
-    {
-        id: 29,
-        name: 'Koťe v boťe'
-    },
-    {
-        id: 30,
-        name: 'Bratři zpátečníci'
-    },
-    {
-        id: 31,
-        name: 'Dávej Dávej'
-    },
-    {
-        id: 32,
-        name: 'Duranga vole'
-    },
-    {
-        id: 33,
-        name: '2 Guys 14 Beers'
-    },
-    {
-        id: 34,
-        name: 'Võileib või võisai'
-    },
-    {
-        id: 35,
-        name: 'Džehovis'
-    },
-    {
-        id: 36,
-        name: 'DosAlcoholico'
-    },
-    {
-        id: 37,
-        name: ''
-    },
-    {
-        id: 39,
-        name: ''
-    },
-    {
-        id: 38,
-        name: ''
-    },
-    {
-        id: 40,
-        name: ''
-    }
-];
+    {id: 1, name: 'OLAFIT'},
+    {id: 2, name: 'Vopraváři'},
+    {id: 3, name: 'Triezvych nas nedostanu'},
+    {id: 4, name: 'Beerturisti'},
+    {id: 5, name: 'Dneska s Mírou'},
+    {id: 6, name: 'Wish you were bear'},
+    {id: 7, name: 'Duo MORDOR'},
+    {id: 8, name: 'Pejsek a kočička'},
+    {id: 9, name: 'Pacienti'},
+    {id: 10, name: 'Burani'},
+    {id: 11, name: 'Flamingo Brothers'},
+    {id: 12, name: 'Klub chovatelů ptactva'},
+    {id: 13, name: 'Kobry!'},
+    {id: 14, name: 'Bezdůstojní'},
+    {id: 15, name: 'Autcideři'},
+    {id: 16, name: 'Počůráníčko'},
+    {id: 17, name: 'Užovky'},
+    {id: 18, name: 'Krčok jaternice'},
+    {id: 19, name: 'Lenochodi'},
+    {id: 20, name: 'Bez Píva to nejde'},
+    {id: 21, name: 'BloodBrothers'},
+    {id: 22, name: 'Čubičky'},
+    {id: 23, name: ''},
+    {id: 24, name: ''},
+    {id: 25, name: ''},
+    {id: 26, name: ''},
+    {id: 27, name: ''},
+    {id: 28, name: ''},
+    {id: 29, name: ''},
+]

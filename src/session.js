@@ -50,7 +50,7 @@
     function startNewSession() {
         var session = {};
         session.date = new Date();
-        session.name = 'Started at ' + _.formatValue('dd.MM.YYYY h:mm:ss', session.date);
+        session.name = 'Started at ' + _.formatValue('dd.MM.yyyy h:mm:ss', session.date);
         session.key = 'PBB_SESS_' + Math.floor(session.date.getTime()/1000);
 
         var sessions = JSON.parse(localStorage.getItem(app.sessionsKey));

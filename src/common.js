@@ -116,7 +116,7 @@ window.onhashchange = function() {
 
         /* special case for collapser */
         if (parseInt(team.id, 10) > 0) {
-            teamRow.set('%group', Math.floor(team.id/10));
+            teamRow.set('%group', Math.floor(team.id / app.teamGroupBySize));
         } else {
             $('.team-id', teamRow).set('+arrow');
         }

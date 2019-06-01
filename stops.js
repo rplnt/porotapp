@@ -1,8 +1,8 @@
 stops = [
-    'Naproti',
-    'Kabinet',
-    'Semba',
-    'Hostimil',
-    'BarBar',
-    'Lužánky'
+    'U Vašinů',
+    'U Tekutého chleba',
+    'U Průmyslovky',
+    'U Jelena',
+    'U Dvou přátel',
+    'Bajkazyl'
 ];

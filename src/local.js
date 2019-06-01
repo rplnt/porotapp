@@ -63,9 +63,9 @@
         var lastBreak = -1;
         for (var i = 0; i < startlist.length; i++) {
             if (data.visitedTeams[startlist[i].id]) continue;
-            if (Math.floor(startlist[i].id / 10) > lastBreak) {
-                lastBreak = Math.floor(startlist[i].id / 10);
-                var divRow = app.getTeamRow({name: ((lastBreak * 10) + ' - ' + (lastBreak * 10 + 9)), id: '►'}, toggleRows);
+            if (Math.floor(startlist[i].id / app.teamGroupBySize) > lastBreak) {
+                lastBreak = Math.floor(startlist[i].id / app.teamGroupBySize);
+                var divRow = app.getTeamRow({name: ((lastBreak * app.teamGroupBySize) + ' - ' + ((lastBreak + 1) * app.teamGroupBySize - 1)), id: '►'}, toggleRows);
                 teamTable.add(divRow);
             }
             teamTable.add(app.getTeamRow(startlist[i], teamStart, [i, startlist[i].id]).set('+hidden'));

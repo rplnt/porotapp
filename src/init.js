@@ -8,6 +8,7 @@ var App = {
     sessionsKey: 'PBBSessions' + this.year,
     runDurationHours: 4,
     currentHash: '',
+    teamGroupBySize: 10,
 };
 
 
